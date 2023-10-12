@@ -1,30 +1,29 @@
-
+import matplotlib as plt
 import cv2
 import numpy as np
 
-image = cv2.imread('star.jpg')
+image = cv2.imread('C:/Users/thegr/Desktop/WORK/year 3/python data/star.jpg')
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+(threshold, im_bw) = cv2.threshold(gray, 150, 255, cv2.THRESH_TOZERO)
 
-threshold_value = 200
-ret, binary_image = cv2.threshold(gray, threshold_value, 255, cv2.THRESH_BINARY)
 
-contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+#edges = cv2.Canny(im_bw,50,150)
 
-bright_spot_coordinates = []
+maxgap = 20
+minlength = 50
+blank = np.copy(im_bw)
 
-for contour in contours:
-    # Calculate the moments of the contour to find its centroid
-    M = cv2.moments(contour)
+lines = cv2.HoughLinesP(im_bw,1,(np.pi/180),15,np.array([]),minlength,maxgap)
+print(lines)
+for line in lines:
+    for x1,x2,y1,y2 in line:
+        cv2.line(blank,(x1,y1),(x2,y2),(255,0,0),3)
 
-    if M["m00"] != 0:
-        cX = int(M["m10"] / M["m00"])
-        cY = int(M["m01"] / M["m00"])
-        bright_spot_coordinates.append((cX, cY))
-        
-for coord in bright_spot_coordinates:
-    cv2.circle(image, coord, 5, (0, 0, 255), -1)  # Draw a red circle at the coordinates
 
-cv2.imshow('Bright Spots', image)
+
+print(lines)
+cv2.imshow("lines",blank)
+cv2.imshow("bw",im_bw)
+
 cv2.waitKey(0)
-cv2.destroyAllWindows()
